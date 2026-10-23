@@ -1,0 +1,27 @@
+<h1>Welcome to Myway</h1>
+<p>You are seeing this, because your installation of Myway is not set up properly. Fill in and submit the form below to get started.</p>
+<form id="setup-form" action="/setup" method="post">
+  <fieldset>
+    <legend>Site title</legend>
+    <label for="title">Your site's title</label>
+    <input id="title" name="title" type="text" maxlength="64" minlength="3" placeholder="Myway Installation" value="<%= config.title %>" required="required"/>
+    <p class="explanation">This title is displayed across all the pages in this installation, at the very end of it. It should be between 3 and 64 characters long.</p>
+  </fieldset>
+  <fieldset>
+    <legend>Default theme</legend>
+    <label for="theme">Default theme for collections</label>
+    <select id="theme" name="theme">
+      <% (available_themes || []).collect do |theme| %>
+        <% if theme == config.theme %>
+          <option selected="selected" value="<%= theme %>"><%= theme %></option>
+        <% else %>
+          <option value="<%= theme %>"><%= theme %></option>
+        <% end %>
+      <% end %>
+    </select>
+    <p class="explanation">The default can be overwritten per collection.</p>
+  </fieldset>
+  <%= erb :_new_user_fieldset, :locals => {new_user_title: "Administrator account", user: config.admin || {}} %>
+  <%= erb :_form_errors, :locals => {form_errors: user_errors} if user_errors && !user_errors.empty? %>
+  <input type="submit" value="Submit" />
+</form>

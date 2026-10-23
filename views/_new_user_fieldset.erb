@@ -1,0 +1,23 @@
+<fieldset class="new-user">
+  <legend><%= new_user_title || "New user" %></legend>
+  <label for="login">User login</label>
+  <input
+    type="text"
+    id="login"
+    name="login"
+    placeholder="userlogin"
+    value="<%= user.login %>"
+    maxlength="16"
+    minlength="3"
+    required="required"
+    pattern="[a-z]{3,16}"/>
+  <p class="explanation">Define a login. Once selected, the login cannot be changed. Only lowercase letters from a to z are allowed. Login must be between 3 and 16 characters long.</p>
+  <label for="name">Display name</label>
+  <input type="text" id="name" name="name" placeholder="Display name" value="<%= user.name %>" maxlength="64"/>
+  <p class="explanation">This is the display name, shown everywhere on screen. It defaults to the login. It can be at most 64 characters long.</p>
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" minlength="8" required="required" maxlength="128"/>
+  <p class="explanation">The password must be at least 8 characters long (and at most 128). Please mix letters and digits, and ideally include also a special character or two.</p>
+  <label for="retype-password">Retype password</label>
+  <input type="password" id="retype-password" name="retype-password" required="required" maxlength="128" minlength="8"/>
+</fieldset>

@@ -1,0 +1,22 @@
+<!-- Items -->
+<div class="items">
+
+  <div class="item intro span-3">
+    <h1><%= @context.collection.title %></h1>
+  </div>
+  <div class="item explanation span-3">
+    <p><%= @context.collection.description %></p>
+  </div>
+</div>
+  <% @context.galleries.each do |gallery_name, gallery| %>
+  <div class="items">
+    <div class="item intro span-3">
+      <h2><a href="/collection/<%= @context.collection_name %>/<%= gallery_name %>" rel="nofollow"><%= gallery.title %></a></h2>
+    </div>
+    <div class="item explanation span-3">
+      <p><%= gallery.description || '(this gallery has no description)' %></p>
+    </div>
+  </div>
+  <% end %>
+
+

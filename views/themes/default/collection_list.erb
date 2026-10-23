@@ -1,0 +1,24 @@
+<!-- Items -->
+<div class="items">
+  <% @context.collections.each do |name, collection| %>
+  <div class="item intro span-3">
+    <h1><a href="/collection/<%= name %>" rel="nofollow"><%= collection.title %></a></h1>
+  </div>
+  <div class="item explanation span-3">
+    <p>
+      <%= collection.description || '(this collection has no description)' %>
+    </p>
+    <p class="collection-operations">
+      <% if collection.operations.allow_visitors %>
+        &#x1F642;
+      <% end %>
+      <% if collection.operations.allow_reactions %>
+        &#x1F49B;
+      <% end %>
+      <% if collection.operations.allow_comments %>
+        &#x1F4AC;
+      <% end %>
+    </p>
+  </div>
+  <% end %>
+</div>
