@@ -47,7 +47,7 @@ module Myway
       'collections/' + name
     end
     def ensure_collection_dir(name)
-      [collection_dir(name), image_dir(name)].each { |path| Dir.mkdir(path) unless Dir.exist?(path) }
+      [collection_dir(name), image_dir, image_dir(name)].each { |path| Dir.mkdir(path) unless Dir.exist?(path) }
     end
 
     def gallery_file(collection, gallery)
@@ -56,7 +56,7 @@ module Myway
     def gallery_dir(collection, gallery)
       ['collections', collection, gallery].join('/')
     end
-    def image_dir(collection, gallery = nil)
+    def image_dir(collection = nil, gallery = nil)
       ['public', 'images', collection, gallery].compact.join('/')
     end
     def ensure_gallery_dir(collection, gallery)
