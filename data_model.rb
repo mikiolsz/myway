@@ -2,7 +2,7 @@
 
 module Myway
   class DataModel
-    def initialize(backend, default_theme, default_owner)
+    def initialize(backend, default_owner, default_theme = 'default')
       @backend = backend
       @default_theme = default_theme
       @default_owner = default_owner
@@ -12,9 +12,9 @@ module Myway
       path != '.' && path != '..' && path != '/' && !path&.include?('..') && !path&.include?('//') && path&.length > 2 && File.directory?(path) && File.readable?(path)
     end
 
-    def build_collection_from(params)
+    def build_collection_from(params, updating = false)
       collection_errors = []
-      collection_errors << 'Incorrect collection name.' unless params['name']&.match?(/[a-z0-9_-]{3,16}/) && !@backend.collection_exist?(params['name'])
+      collection_errors << 'Incorrect collection name.' unless params['name']&.match?(/[a-z0-9_-]{3,16}/) && (@backend.collection_exist?(params['name']) == updating)
       collection_errors << 'Invalid source directory.' unless valid_source?(params['source'])
       collection_errors << 'Incorrect collection title.' unless params['title']&.match?(/.{3,64}/)
       collection_errors << 'Incorrect password.' unless params['password'].nil? || params['password'].empty? || params['password']&.length&.between?(8, 32)
@@ -37,6 +37,10 @@ module Myway
       new_collection.full = {'max_width' => 2000, 'max_height' => 1500}
 
       [collection_errors, new_collection]
+    end
+
+    def valid_password?(expected_encrypted_password, provided_password, collection_name, gallery_name = nil)
+      expected_encrypted_password == Digest::SHA512.hexdigest([collection_name, gallery_name, provided_password].compact.join(':'))
     end
   end
 

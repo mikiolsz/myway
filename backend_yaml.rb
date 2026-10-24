@@ -19,7 +19,7 @@ module Myway
       Dir.glob('collections/*').select { |dir| File.directory?(dir) && !dir.start_with?('.') }.collect { |dir| dir.split('/').last }
     end
     def all_collections(user = nil)
-      Hash[available_collections.collect { |entry| [entry, (YAML.load_file(collection_file(entry)) rescue nil)] }.reject { |a| a[1].nil? }.filter { |a| user.admin || a[1].password.nil? || a[1].visitors.any? {|v| v.login == user.login} }]
+      Hash[available_collections.collect { |entry| [entry, (YAML.load_file(collection_file(entry)) rescue nil)] }.reject { |a| a[1].nil? }.filter { |a| user.admin || a[1].password.nil? || a[1].visitors&.any? {|v| v.login == user.login} }]
     end
     def collection_data(name)
       YAML.load_file(collection_file(name))
@@ -47,32 +47,50 @@ module Myway
       'collections/' + name
     end
     def ensure_collection_dir(name)
-      path = collection_dir(name)
-      Dir.mkdir(path) unless Dir.exist?(path)
+      [collection_dir(name), image_dir(name)].each { |path| Dir.mkdir(path) unless Dir.exist?(path) }
     end
 
     def gallery_file(collection, gallery)
-      ['collections', collection, gallery, '.gallery.yml'].join('/')
+      [gallery_dir(collection, gallery), '.gallery.yml'].join('/')
     end
     def gallery_dir(collection, gallery)
       ['collections', collection, gallery].join('/')
     end
+    def image_dir(collection, gallery = nil)
+      ['public', 'images', collection, gallery].compact.join('/')
+    end
     def ensure_gallery_dir(collection, gallery)
-      path = gallery_dir(collection, gallery)
-      Dir.mkdir(path) unless Dir.exist?(path)
+      [gallery_dir(collection, gallery), image_dir(collection, gallery)].each { |dir| Dir.mkdir(dir) unless Dir.exist?(dir) }
     end
 
     def image_data_file(collection, gallery, file)
-      ['collections', collection, gallery, file + '.yml'].join('/')
+      [gallery_dir(collection, gallery), file.split('.')[0..-2].join + '.yml'].join('/')
     end
     def image_miniature_file(collection, gallery, file)
-      ['collections', collection, gallery, 'mini.'+file].join('/')
+      [image_dir(collection, gallery), 'mini.'+file].join('/')
+    end
+    def image_miniature_url(collection, gallery, file)
+      ['/images', collection, gallery, 'mini.'+file].join('/')
     end
     def image_full_file(collection, gallery, file)
-      ['collections', collection, gallery, 'full.'+file].join('/')
+      [image_dir(collection, gallery), 'full.'+file].join('/')
+    end
+    def image_full_url(collection, gallery, file)
+      ['/images', collection, gallery, 'full.'+file].join('/')
     end
 
-    def reinit_collection(collection_name, path_to_scan, miniature_size_string)
+    def gallery_details(collection, gallery)
+      Dir.glob(File.join(gallery_dir(collection, gallery), '*.yml'))
+         .collect { |path| path.split('/').last }
+         .collect do |filename|
+         data = { 'data_file' => filename, 'data' => YAML.load_file(image_data_file(collection, gallery, filename)), 'data_name' => filename.split('.')[0..-2].join }
+         data.file_path = {'miniature' => image_miniature_file(collection, gallery, data['data']['filename']), 'full' => image_full_file(collection, gallery, data['data']['filename'])}
+         data.url_path = {'miniature' => image_miniature_url(collection, gallery, data['data']['filename']), 'full' => image_full_url(collection, gallery, data['data']['filename'])}
+         data
+      end
+    end
+
+    def reinit_collection(collection_name, path_to_scan, miniature_size_string, full_size_string)
       warn 'this has not been implemented yet'
     end
 
@@ -99,7 +117,10 @@ module Myway
               file
             )
             end
-          file_info = {'title' => filename.to_s, 'reactions' => [], 'comments' => []}
+          file_info = {
+            'filename' => filename,
+            'title' => filename.split('.')[0..-2].join,
+          }
 
           # image data file
           File.write(image_data_file(collection_name, dir, filename), YAML.dump(file_info))
@@ -109,7 +130,7 @@ module Myway
     end
 
     def update_setup(config)
-      Dir.mkdir('collections') unless Dir.exist?('collections')
+      %w{collections public public/images}.each {|dir| Dir.mkdir(dir) unless Dir.exist?(dir) }
       File.write(MAIN_CONFIG_FILE, YAML.dump(config))
     end
 

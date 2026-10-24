@@ -1,0 +1,21 @@
+<!-- Items -->
+<div class="items">
+
+  <div class="item intro span-3">
+    <h1><%= @context.gallery.title %></h1>
+  </div>
+  <div class="item explanation span-3">
+    <p><%= @context.gallery.description %></p>
+  </div>
+</div>
+<% @context.images.each do |image_data| %>
+  <div class="items">
+    <div class="item">
+      <a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image_data.data_name %>" rel="nofollow">
+        <img src="<%= image_data.url_path.miniature %>" alt="<%= image_data.title %>" />
+      </a>
+    </div>
+  </div>
+<% end %>
+
+

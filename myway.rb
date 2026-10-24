@@ -47,6 +47,8 @@ class Application < Sinatra::Base
     if parameters.include?(:gallery)
       @context.gallery_name = gallery_name
       @context.gallery = @backend.gallery_data(collection_name, gallery_name)
+
+      @context.images = @backend.gallery_details(collection_name, gallery_name) if options.include?(:images)
     end
 
     # update user information (as it depends on what already is in the context)
@@ -82,10 +84,17 @@ class Application < Sinatra::Base
     @context.collection_name && (@context.user.admin || @context.user.login == @context.collection.owner)
   end
 
+  def can_access?(collection_name)
+    @context.collection.password.nil? ||
+      @context.user.admin ||
+      (@context.collection.visitors || []).include?(@context.user.login) ||
+      session[collection_name] == @context.collection.title
+  end
+
   before do
     @backend = Backend.new
     @config = @backend.load_config
-    @data_model = DataModel.new(@backend, @config.theme, @config.admin.login)
+    @data_model = DataModel.new(@backend, @config.admin.login, @config.theme) if @config
 
     in_context # initialise context
   end
@@ -153,12 +162,26 @@ class Application < Sinatra::Base
     erb (@context.collections.empty? ? :no_collections : :collection_list), views: 'views/themes/' + @config.theme, layout: :site_layout
   end
 
-  get '/collection/:name' do |collection_name|
+  post '/collection' do
+    # password protection is sent here
+    halt 400 unless params['password'] && params['name']
+    halt 404 unless @backend.available_collections.include? params['name']
+    in_context :collections, :collection => params['name']
+
+    if @data_model.valid_password?(@context.collection.password, params['password'], @context.collection_name)
+      session[@context.collection_name] = @context.collection.title
+      redirect to('/collection/' + @context.collection_name)
+    else
+      erb :password_protected, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout, locals: {incorrect_password: true}
+    end
+  end
+
+  get '/collection/:name?' do |collection_name|
     halt 404 unless @backend.available_collections.include?(collection_name)
 
     in_context :collections, :collection => collection_name
 
-    view_to_render = if @context.collection.password.nil? || @context.user.admin || (@context.collection.visitors || []).include?(@context.user.login)
+    view_to_render = if can_access?(collection_name)
                        in_context :galleries
                        :collection
                      elsif @context.collection.password
@@ -166,13 +189,21 @@ class Application < Sinatra::Base
                      else halt 500
                      end
 
-    erb view_to_render, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout
+    erb view_to_render, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout, locals: {incorrect_password: false}
   end
 
   get '/collection/:collection_name/:gallery_name' do |collection_name, gallery_name|
     halt 404 unless @backend.available_collections.include?(collection_name) && @backend.available_galleries(collection_name).include?(gallery_name)
+    in_context :collections, :collection => collection_name
 
-    in_context :collections, :galleries, :collection => collection_name, :gallery => gallery_name
+    view_to_render = if can_access?(collection_name)
+                       in_context :galleries, :images, :gallery => gallery_name
+                       :gallery
+                     else
+                       :password_protected
+                     end
+
+    erb view_to_render, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout
   end
 
   get '/edit/:collection_name' do |collection_name|
@@ -191,7 +222,7 @@ class Application < Sinatra::Base
     in_context :collections, :collection => collection_name
     halt 403 unless can_change_collection?
 
-    collection_errors, new_collection = @data_model.build_collection_from params
+    collection_errors, new_collection = @data_model.build_collection_from(params, true)
 
     if collection_errors.empty?
       @backend.update_collection(collection_name, new_collection)
@@ -204,7 +235,7 @@ class Application < Sinatra::Base
       end
       redirect to('/collection/' + collection_name)
     else
-      erb :new_collection, layout: :admin, locals: {collection_errors: collection_errors, collection: new_collection}
+      erb :edit_collection, layout: :admin, locals: {collection_errors: collection_errors, collection: new_collection}
     end
 
   end

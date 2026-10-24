@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    base64 (0.2.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.9)
@@ -26,6 +27,7 @@ PLATFORMS
   x64-mingw-ucrt
 
 DEPENDENCIES
+  base64
   puma
   rmagick
   sinatra

@@ -86,9 +86,10 @@ Every supported image file in the gallery directory has its own yaml with inform
       body: "comment body here; note that some sanity checks and filtering is done, this is expected to be plain text with minor markdown support"
 ```
 
-# Miniatures
+# Miniatures and "full size"
 
-Miniatures of the original images are created using ImageMagick. The miniature is placed in `collections/{collection_name}/{gallery_name}/{file_name}.mini.jpg`.
+Miniatures of the original images are created using ImageMagick. The miniature is placed in `public/images/{collection_name}/{gallery_name}/mini.{file_name}.jpg`.
+Similarly, full size preview file is created (same place as the miniature, except filename is prefixed with `full.`) - the original images are not accessed by Myway.
 
 # Templating
 
