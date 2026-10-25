@@ -10,10 +10,10 @@
 </div>
 <% @context.images.each_slice(5) do |slice| %>
   <div class="items">
-    <% slice.each do |image_data| %>
+    <% slice.each do |image_details| %>
     <article class="item thumb span-1">
-      <h2><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image_data.data_name %>" rel="nofollow"><%= image_data.title %></a></h2>
-      <img src="<%= image_data.url_path.miniature %>" alt="<%= image_data.title %>" />
+      <h2><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image_details.data_name %>" rel="nofollow"><%= image_details.data.title %></a></h2>
+      <img src="<%= image_details.url_path.miniature %>" alt="<%= image_details.data.title %>" />
     </article>
     <% end %>
   </div>

@@ -1,0 +1,8 @@
+<img src="<%= @context.image.url_path.full %>" alt="<%= @context.image.data.title %>" />
+<% if @context.image.previous %>
+  <a href="<%= @context.image.previous %>" rel="nofollow">Previous image</a>
+<% end %>
+<% if @context.image.next %>
+  <a href="<%= @context.image.next %>" rel="nofollow">Next image</a>
+<% end %>
+<p>Total <%= @context.image.comments.size %> comments and <%= @context.image.reactions.size %> reactions.</p>

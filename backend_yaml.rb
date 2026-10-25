@@ -40,6 +40,10 @@ module Myway
       Dir.glob(File.join(collection_dir(collection_name), '*')).select { |dir| File.directory?(dir) && !dir.start_with?('.') }.collect { |dir| dir.split('/').last }
     end
 
+    def available_images(collection_name, gallery_name)
+      Dir.glob(File.join(gallery_dir(collection_name, gallery_name), '*.yml')).select {|path| File.file?(path)}.collect { |dir| File.basename(dir, '.*') }
+    end
+
     def collection_file(name)
       ('collections/' + name + '/.collection.yml').freeze
     end
@@ -47,7 +51,7 @@ module Myway
       'collections/' + name
     end
     def ensure_collection_dir(name)
-      [collection_dir(name), image_dir, image_dir(name)].each { |path| Dir.mkdir(path) unless Dir.exist?(path) }
+      [collection_dir(name), public_images_dir, public_images_dir(name)].each { |path| Dir.mkdir(path) unless Dir.exist?(path) }
     end
 
     def gallery_file(collection, gallery)
@@ -56,37 +60,55 @@ module Myway
     def gallery_dir(collection, gallery)
       ['collections', collection, gallery].join('/')
     end
-    def image_dir(collection = nil, gallery = nil)
+    def public_images_dir(collection = nil, gallery = nil)
       ['public', 'images', collection, gallery].compact.join('/')
     end
     def ensure_gallery_dir(collection, gallery)
-      [gallery_dir(collection, gallery), image_dir(collection, gallery)].each { |dir| Dir.mkdir(dir) unless Dir.exist?(dir) }
+      [gallery_dir(collection, gallery), public_images_dir(collection, gallery)].each { |dir| Dir.mkdir(dir) unless Dir.exist?(dir) }
     end
 
-    def image_data_file(collection, gallery, file)
-      [gallery_dir(collection, gallery), file.split('.')[0..-2].join + '.yml'].join('/')
+    def image_data_file(collection, gallery, image)
+      [gallery_dir(collection, gallery), image + '.yml'].join('/')
     end
     def image_miniature_file(collection, gallery, file)
-      [image_dir(collection, gallery), 'mini.'+file].join('/')
+      [public_images_dir(collection, gallery), 'mini.'+file].join('/')
     end
     def image_miniature_url(collection, gallery, file)
       ['/images', collection, gallery, 'mini.'+file].join('/')
     end
     def image_full_file(collection, gallery, file)
-      [image_dir(collection, gallery), 'full.'+file].join('/')
+      [public_images_dir(collection, gallery), 'full.'+file].join('/')
     end
     def image_full_url(collection, gallery, file)
       ['/images', collection, gallery, 'full.'+file].join('/')
     end
 
+    def image_data_dir(collection, gallery, image)
+      ['collections', collection, gallery, image].join('/')
+    end
+    def ensure_image_data_dir(collection, gallery, image)
+      Dir.mkdir(image_data_dir(collection, gallery, image)) unless Dir.exist?(image_data_dir(collection, gallery, image))
+    end
+
+    def image_reactions(collection, gallery, image)
+      Dir.glob(File.join(image_data_dir(collection, gallery, image), 'reaction.*.yml')).collect { |path| YAML.load_file(path) rescue nil }.compact
+    end
+    def image_comments(collection, gallery, image)
+      Dir.glob(File.join(image_data_dir(collection, gallery, image), 'comment.*.yml')).collect { |path| YAML.load_file(path) rescue nil }.compact
+    end
+
     def gallery_details(collection, gallery)
       Dir.glob(File.join(gallery_dir(collection, gallery), '*.yml'))
-         .collect { |path| path.split('/').last }
-         .collect do |filename|
-         data = { 'data_file' => filename, 'data' => YAML.load_file(image_data_file(collection, gallery, filename)), 'data_name' => filename.split('.')[0..-2].join }
-         data.file_path = {'miniature' => image_miniature_file(collection, gallery, data['data']['filename']), 'full' => image_full_file(collection, gallery, data['data']['filename'])}
-         data.url_path = {'miniature' => image_miniature_url(collection, gallery, data['data']['filename']), 'full' => image_full_url(collection, gallery, data['data']['filename'])}
-         data
+         .collect { |path| File.basename(path, '.*') }
+         .collect do |image_name|
+
+        details = { 'data_file' => image_data_file(collection, gallery, image_name), 'data_name' => image_name }
+        details.data = YAML.load_file(image_data_file(collection, gallery, image_name))
+        details.comments = image_comments(collection, gallery, image_name)
+        details.reactions = image_reactions(collection, gallery, image_name)
+        details.file_path = {'miniature' => image_miniature_file(collection, gallery, details.data.filename), 'full' => image_full_file(collection, gallery, details.data.filename)}
+        details.url_path = {'miniature' => image_miniature_url(collection, gallery, details.data.filename), 'full' => image_full_url(collection, gallery, details.data.filename)}
+        details
       end
     end
 
@@ -106,24 +128,26 @@ module Myway
         File.write(gallery_file(collection_name, dir), YAML.dump(gallery_info))
 
         # process image files found in the gallery
-        images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }.collect { |path| path.split('/').last }
-        images.each do |filename|
-          {image_miniature_file(collection_name, dir, filename) => miniature_size_string, image_full_file(collection_name, dir, filename) => full_size_string}.each do |file, size|
+        images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }.collect { |path| File.basename(path) }
+        images.each do |full_filename|
+          {image_miniature_file(collection_name, dir, full_filename) => miniature_size_string, image_full_file(collection_name, dir, full_filename) => full_size_string}.each do |file, size|
             # create image miniature and "full size"
             _out, _err, _status = Open3.capture3(
               "magick",
-              File.join(path_to_scan, dir, filename),
+              File.join(path_to_scan, dir, full_filename),
               "-resize", size,
               file
             )
-            end
+          end
+          just_filename = File.basename(full_filename, '.*')
           file_info = {
-            'filename' => filename,
-            'title' => filename.split('.')[0..-2].join,
+            'filename' => full_filename,
+            'title' => just_filename,
           }
+          ensure_image_data_dir(collection_name, dir, just_filename)
 
           # image data file
-          File.write(image_data_file(collection_name, dir, filename), YAML.dump(file_info))
+          File.write(image_data_file(collection_name, dir, just_filename), YAML.dump(file_info))
         end
 
       end

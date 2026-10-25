@@ -48,7 +48,17 @@ class Application < Sinatra::Base
       @context.gallery_name = gallery_name
       @context.gallery = @backend.gallery_data(collection_name, gallery_name)
 
-      @context.images = @backend.gallery_details(collection_name, gallery_name) if options.include?(:images)
+      @context.images = @backend.gallery_details(collection_name, gallery_name) if options.include?(:images) || parameters[:image]
+      image_name = parameters[:image] || @context.image_name
+      if parameters.include?(:image)
+        @context.image_name = image_name
+        index = @context.images.find_index { |i| i.data_name == image_name }
+        @context.image = @context.images[index]
+        @context.image.index = index
+        @context.image.total = @context.images.size
+        @context.image.next = '/' + ['collection', collection_name, gallery_name, @context.images[index+1].data_name].join('/') unless index >= @context.images.size
+        @context.image.previous = '/' + ['collection', collection_name, gallery_name, @context.images[index-1].data_name].join('/') unless index <= 0
+      end
     end
 
     # update user information (as it depends on what already is in the context)
@@ -203,6 +213,18 @@ class Application < Sinatra::Base
                        :password_protected
                      end
 
+    erb view_to_render, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout
+  end
+
+  get '/collection/:collection_name/:gallery_name/:image_name' do |collection_name, gallery_name, image_name|
+    halt 404 unless @backend.available_collections.include?(collection_name) && @backend.available_galleries(collection_name).include?(gallery_name) && @backend.available_images(collection_name, gallery_name).include?(image_name)
+    in_context :collections, :collection => collection_name
+    view_to_render = if can_access?(collection_name)
+                       in_context :galleries, :images, :gallery => gallery_name, :image => image_name
+                       :image
+                     else
+                       :password_protected
+                     end
     erb view_to_render, views: 'views/themes/' + (@context.collection.theme || @config.theme), layout: :site_layout
   end
 
