@@ -43,12 +43,25 @@
     <p class="explanation">When enabled, allows logged-in users to write comments about the image. Comments are visible to all visitors, even those that did not log in.</p>
   </fieldset>
   <fieldset>
+    <legend>Image downloads</legend>
+    <div class="form-row">
+      <label for="allow_downloads" id="allow_downloads">Allow all users to download full-size images?</label>
+      <input type="checkbox" id="allow_downloads" name="allow_downloads" value="true" <%= 'checked="checked"' if collection&.operations&.allow_downloads %>/>
+    </div>
+    <p class="explanation">When enabled, all users will be able to download the original image file. Note that resized images (miniatures and "full size") can always be downloaded, as they are displayed in the browser.</p>
+  </fieldset>
+  <fieldset>
     <legend>Other options</legend>
     <div class="form-row">
     <label for="description">Collection description</label>
     <textarea id="description" name="description"><%= collection&.description %></textarea>
     </div>
     <p class="explanation">A more detailed information about the collection.</p>
+    <div class="form-row">
+    <label for="information">Collection information</label>
+    <textarea id="information" name="information"><%= collection&.information %></textarea>
+    </div>
+    <p class="explanation">This text is displayed at the bottom of the screen, together with site information.</p>
     <div class="form-row">
     <label for="password">Collection password</label>
     <input type="password" id="password" name="password" minlength="8" maxlength="32" value="<%= collection.password %>"/>

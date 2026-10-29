@@ -12,6 +12,9 @@
       <% if collection.operations.allow_comments %>
         <li><span class="fa-regular fa-comments" title="Logged in users can comment" /></li>
       <% end %>
+      <% if collection.operations.allow_downloads %>
+        <li><span class="fa-solid fa-file-arrow-down" title="Users can download full-size images" /></li>
+      <% end %>
     </ul>
     <ul class="actions">
       <% if @context.user.login == collection.owner %>

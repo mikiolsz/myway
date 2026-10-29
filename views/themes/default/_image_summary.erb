@@ -6,14 +6,19 @@
     </a>
   </div>
   <footer class="centred normal-size">
-      <% if @context.collection.operations.allow_reactions %>
-        <%= erb :_image_reactions, locals: {image: image, context: @context} %>
-      <% end %>
-      <% if @context.collection.operations.allow_comments %>
-        <ul class="icons comments">
-          <li><span class="reaction-count"><span class="reaction">💬</span><span class="count"><%= image.all_comments.count %></span></span></li>
-        </ul>
-      <% end %>
+    <% if @context.collection.operations.allow_reactions %>
+      <%= erb :_image_reactions, locals: {image: image, context: @context} %>
+    <% end %>
+    <% if @context.collection.operations.allow_comments %>
+      <ul class="icons comments">
+        <li><span class="reaction-count"><span class="reaction">💬</span><span class="count"><%= image.all_comments.count %></span></span></li>
+      </ul>
+    <% end %>
+    <% if @context.collection.operations.allow_downloads %>
+      <ul class="icons downloads">
+        <li><a href="/download/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" rel="nofollow" title="Download full-size version">⬇️</a></li>
+      </ul>
+    <% end %>
   </footer>
   <footer>
     <ul class="actions">

@@ -33,7 +33,7 @@
       <% if @context.user.login %>
       <div>Welcome, <%= @context.user.name %>!</div>
       <% elsif @context.collection_name && @context.collection.operations.allow_visitors %>
-      <p>You are not logged in. You can <a href="/login/<%= @context.collection_name %>" rel="nofollow" class="has-icon visitor-login-link">log in as a visitor</a> or <a href="/register/<%= @context.collection_name %>" class="has-icon visitor-register-link" rel="nofollow">create as a new visitor account</a>.</p>
+      <p>You are not logged in. You can <a href="/login/<%= @context.collection_name %>" rel="nofollow" class="has-icon visitor-login-link">log in</a> or <a href="/register/<%= @context.collection_name %>" class="has-icon visitor-register-link" rel="nofollow">create a new visitor account</a>.</p>
       <% end %>
     </div>
   </header>
@@ -42,11 +42,21 @@
   <%= yield %>
   </section>
 
+  <% if @config.site_information %>
+  <footer id="site-information">
+    <% if @context.collection&.information %>
+    <p class="explanation"><%= @context.collection.information %></p>
+    <% end %>
+    <p class="explanation"><%= @config.site_information %></p>
+  </footer>
+  <% end %>
+
   <!-- Footer -->
   <footer id="footer">
     <ul class="actions">
       <% if @context.user.admin %>
       <li><a href="/admin/collection" rel="nofollow" class="create-collection-link has-icon">Create a new collection</a></li>
+      <li><a href="/admin/setup" rel="nofollow" class="edit-setup-link has-icon">Edit site settings</a></li>
       <% else %>
       <li><a href="/admin" rel="nofollow" class="admin-login-link has-icon">Log in as admin</a></li>
       <% end %>

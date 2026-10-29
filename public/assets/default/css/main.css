@@ -20,6 +20,10 @@
   --text-area-height: 12rem;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background-main-colour);
   color: var(--text-colour);
@@ -131,6 +135,10 @@ a.create-collection-link::before {
   content: "\f302";
 }
 
+a.edit-setup-link::before {
+  content: "\f1de";
+}
+
 ul.icons {
   padding: 0;
 }
@@ -167,6 +175,16 @@ ul.reactions li {
   justify-content: space-between;
   z-index: 100;
   background: var(--dark-background-colour);
+}
+
+@media (max-width: 600px) {
+  #main #header {
+    font-size: smaller;
+  }
+
+  #main #header a {
+    font-weight: normal;
+  }
 }
 
 .breadcrumbs {
@@ -331,8 +349,14 @@ ul.reactions li {
 }
 
 #main .full-image .image-display .image-reactions span,
-#main .full-image .image-display .image-reactions .link-to-comments {
+#main .full-image .image-display .image-reactions .link-to-comments,
+#main .full-image .image-display .image-reactions .download-link {
   font-size: xx-large;
+}
+
+#main .full-image .image-display .image-reactions .link-to-comments:hover,
+#main .full-image .image-display .image-reactions .download-link:hover {
+  text-decoration: none;
 }
 
 #main .full-image .image-display .image-with-navigation {
@@ -377,7 +401,7 @@ ul.reactions li {
 }
 
 #main .full-image #image-description {
-  width: var(--wide-column-width);
+  max-width: var(--wide-column-width);
   display: block;
   margin-inline: auto;
   border-bottom: 2px solid var(--darker-text-colour);

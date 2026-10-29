@@ -1,6 +1,10 @@
-<section id="collections">
-  <article class="collection-summary">
+<section id="collections" class="list">
+  <article class="collection-summary nice-box">
     <header><h2><%= @config.title %></h2></header>
-    <div><%= @config.description %></div>
+    <div><%= @config.site_description %></div>
+  </article>
+  <article class="collection-summary nice-box with-border">
+    <header><h3>Site instructions</h3></header>
+    <div>There are no collections with public access. You should have received a link ending with <code>/collection/{collection-name}</code> and a password - please use it to access the photos.</div>
   </article>
 </section>

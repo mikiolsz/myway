@@ -2,4 +2,10 @@
   <% @context.collections.each do |name, collection| %>
   <%= erb :_collection_summary, locals: {name: name, collection: collection} %>
   <% end %>
+  <% unless @context.user&.admin %>
+    <article class="collection-summary nice-box with-border">
+      <header><h3>Collection not found?</h3></header>
+      <div>The collection you are looking for might not allow public access. You should have received a link ending with <code>/collection/{collection-name}</code> and a password - please use it to access the photos.</div>
+    </article>
+<% end %>
 </section>

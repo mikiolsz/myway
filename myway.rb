@@ -152,9 +152,19 @@ class Application < Sinatra::Base
   end
 
   post '/setup' do
-    halt 401 if @config
+    if @config
+      admin_auth!
+    else
+      halt 401
+    end
 
-    current_config = {'title' => params['title'], 'theme' => params['theme'], 'admin' => {'login' => params['login'], 'name' => params['name']}}
+    current_config = {
+      'title' => params['title'],
+      'theme' => params['theme'],
+      'admin' => {'login' => params['login'], 'name' => params['name']},
+      'site_information' => params['site-information'],
+      'site_description' => params['site-description']
+    }
 
     user_errors = []
     user_errors << 'Incorrect title.' unless params['title']&.length&.between?(3, 64)
@@ -174,6 +184,11 @@ class Application < Sinatra::Base
   get '/admin' do
     admin_auth!
     redirect to('/')
+  end
+
+  get '/admin/setup' do
+    admin_auth!
+    erb :setup, locals: {available_themes: @backend.available_themes, config: @config, user_errors: [] }
   end
 
   get '/admin/collection' do
@@ -406,6 +421,21 @@ class Application < Sinatra::Base
 
     @backend.update_image(collection_name, gallery_name, image_name, new_image)
     redirect to('/collection/' + collection_name + '/' + gallery_name + '/' + image_name)
+  end
+
+  get '/download/:collection_name/:gallery_name/:image_name' do |collection_name, gallery_name, image_name|
+    halt 404 unless @backend.available_collections.include?(collection_name) && @backend.available_galleries(collection_name).include?(gallery_name) && @backend.available_images(collection_name, gallery_name).include?(image_name)
+    in_context :collections, :collection => collection_name
+    halt 403 unless @context.collection.operations.allow_downloads
+    if can_access?(collection_name)
+      in_context :galleries, :images, :gallery => gallery_name, :image => image_name
+      original_file = File.join(@context.collection.source, gallery_name, @context.image.filename)
+      halt 404 unless File.exist?(original_file) && File.readable?(original_file)
+      send_file original_file, filename: @context.image.filename, type: 'image', disposition: 'attachment'
+    else
+      erb :password_protected, locals: {incorrect_password: false}
+    end
+
 
   end
 

@@ -14,7 +14,10 @@
       <%= erb :_image_reactions, locals: { image: @context.image, context: @context } %>
       <% end %>
       <% if @context.collection.operations.allow_comments && @context.user.login %>
-      <a href="#interactions" class="link-to-comments">💬</a>
+      <a href="#interactions" class="link-to-comments" title="Go to comments">💬</a>
+      <% end %>
+      <% if @context.collection.operations.allow_downloads %>
+      <a href="/download/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" class="download-link" title="Download full-size image">⬇️</a>
       <% end %>
     </section>
     <div class="image-with-navigation">
@@ -27,9 +30,10 @@
     <% end %>
     </div>
   </section>
-  <% if @context.image.description %>
   <section id="image-description" class="nice-box">
+    <% if @context.image.description %>
     <p class="has-icon"><%= @context.image.description %></p>
+    <% end %>
     <% if @context.user.login && @context.user.login == @context.collection.owner %>
     <footer>
       <ul class="actions">
@@ -38,7 +42,6 @@
     </footer>
     <% end %>
   </section>
-  <% end %>
   <section id="interactions" class="image-comments grid">
     <% @context.image.all_comments.each do |comment| %>
       <%= erb :_image_comment, locals: {comment: comment, context: @context} %>

@@ -27,11 +27,13 @@ module Myway
         'source' => params['source'],
         'title' => params['title'],
         'description' => params['description'],
+        'information' => params['information'],
         'operations' => {
           'allow_visitors' => params['allow_visitors'] == 'true',
           'allow_reactions' => params['allow_reactions'] == 'true',
           'allow_comments' => params['allow_comments'] == 'true',
-          'reactions' => params['allowed_reactions'].split(' ')
+          'reactions' => params['allowed_reactions'].split(' '),
+          'allow_downloads' => params['allow_downloads'] == 'true',
         },
         'theme' => @default_theme,
         'owner' => @default_owner
