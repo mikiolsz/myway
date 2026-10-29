@@ -3,42 +3,60 @@
 <form id="edit-collection" action="/edit/<%= @context.collection_name %>" method="post">
   <fieldset>
     <legend>Essentials of the collection</legend>
+    <div class="form-row">
     <label for="name">Collection name</label>
     <input type="text" id="name" name="name" placeholder="Collection name" required="required" minlength="3" maxlength="16" pattern="[a-z0-9_-]{3,16]" value="<%= @context.collection_name %>" readonly="readonly"/>
+    </div>
     <p class="explanation">You cannot change the name of a collection. Instead, <a href="/delete/<%= @context.collection_name %>" rel="nofollow">you can delete it permanently</a> (this operation cannot be undone).</p>
+    <div class="form-row">
     <label for="source">Source directory</label>
     <input type="text" id="source" name="source" placeholder="/path/to/photos" required="required" minlength="3" value="<%= collection.source %>" readonly="readonly"/>
+    </div>
     <p class="explanation">Contents of the collection will be recreated: new files and folders will be added, files and folders that no longer exist will be permanently deleted. This cannot be undone.</p>
+    <div class="form-row">
     <label for="title">Collection title</label>
     <input type="text" id="title" name="title" required="required" maxlength="64" minlength="3" value="<%= collection.title %>"/>
+    </div>
     <p class="explanation">This title will be shown in many places on the screen. Changing the title may forcefully </p>
   </fieldset>
   <fieldset>
     <legend>Configuration</legend>
+    <div class="form-row">
     <label for="allow_visitors">Allow visitors to create accounts?</label>
     <input type="checkbox" id="allow_visitors" name="allow_visitors" value="true" <%= 'checked="checked"' if collection.operations.allow_visitors %>/>
+    </div>
     <p class="explanation">When enabled, visitors can create accounts (login and password). All user accounts are specific to this particular collection.</p>
+    <div class="form-row">
     <label for="allow_reactions">Allow visitors to react to images?</label>
     <input type="checkbox" id="allow_reactions" name="allow_reactions" value="true" <%= 'checked="checked"' if collection.operations.allow_reactions %>/>
+    </div>
     <p class="explanation">When enabled, reaction buttons are shown near images to logged in users. Users can react to the image (one reaction of every available kind per image).</p>
+    <div class="form-row">
     <label for="allowed_reactions">Reactions offered to the users (space-separated)</label>
     <input type="text" id="allowed_reactions" name="allowed_reactions" value="<%= collection&.operations&.reactions&.join(' ') %>" maxlength="20"/>
+    </div>
     <p class="explanation">Enter space-separated names displayed on reaction buttons. Since these are shown as is, emojis are a good choice here.</p>
+    <div class="form-row">
     <label for="allow_comments" id="allow_comments">Allow visitors to comment on images?</label>
-    <input type="checkbox" id="allow_comments" name="allow_comments" value="true" <%= 'checked="checked"' if collection.operations.allow_coments %>/>
+    <input type="checkbox" id="allow_comments" name="allow_comments" value="true" <%= 'checked="checked"' if collection.operations.allow_comments %>/>
+    </div>
     <p class="explanation">When enabled, allows logged-in users to write comments about the image. Comments are visible to all visitors, even those that did not log in.</p>
   </fieldset>
   <fieldset>
     <legend>Other options</legend>
+    <div class="form-row">
     <label for="description">Collection description</label>
     <textarea id="description" name="description"><%= collection.description %></textarea>
+    </div>
     <p class="explanation">A more detailed information about the collection.</p>
+    <div class="form-row">
     <label for="password">Collection password</label>
-    <input type="password" id="password" name="password" minlength="8" maxlength="32" value="<%= collection.password %>"/>
+    <input type="password" id="password" name="password" minlength="8" maxlength="32" />
+    </div>
     <p class="explanation">Password is not required. If it is not set, the collection will be publicly available. If it is present, it has to be between 8 and 32 characters long.
       When present, and visitors are enabled, the visitors have to enter the password to view the collection before they can log in.</p>
   </fieldset>
   <%= erb :_form_errors, locals: {form_errors: collection_errors} if collection_errors && !collection_errors.empty? %>
-  <p class="explanation">The gallery will be reindexed after submitting the form. Please make sure you retyped the password if it was present- for security reasons it is cleared every time the form is displayed.</p>
+  <p class="explanation">The collection will be re-indexed after submitting the form. Please make sure you retyped the password if it was present - for security reasons it is cleared every time the form is displayed.</p>
   <input type="submit" value="Update collection"/>
 </form>

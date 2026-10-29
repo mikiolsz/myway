@@ -1,8 +1,68 @@
-<img src="<%= @context.image.url_path.full %>" alt="<%= @context.image.data.title %>" />
-<% if @context.image.previous %>
-  <a href="<%= @context.image.previous %>" rel="nofollow">Previous image</a>
-<% end %>
-<% if @context.image.next %>
-  <a href="<%= @context.image.next %>" rel="nofollow">Next image</a>
-<% end %>
-<p>Total <%= @context.image.comments.size %> comments and <%= @context.image.reactions.size %> reactions.</p>
+<section class="full-image">
+  <section class="image-display">
+    <header>
+      <% if @context.image.previous %>
+        <a href="<%= @context.image.previous %>" class="navigate-previous-image"><span class="fa-solid fa-angles-left" title="Previous image" /></a>
+      <% end %>
+      <h2><%= @context.image.title %></h2>
+      <% if @context.image.next %>
+        <a href="<%= @context.image.next %>" class="navigate-next-image"><span class="fa-solid fa-angles-right" title="Next image" /></a>
+      <% end %>
+    </header>
+    <section class="image-reactions">
+      <% if @context.collection.operations.allow_reactions %>
+      <%= erb :_image_reactions, locals: { image: @context.image, context: @context } %>
+      <% end %>
+      <% if @context.collection.operations.allow_comments && @context.user.login %>
+      <a href="#interactions" class="link-to-comments">💬</a>
+      <% end %>
+    </section>
+    <div class="image-with-navigation">
+    <% if @context.image.previous %>
+      <a href="<%= @context.image.previous %>" class="navigate-previous-image">Previous</a>
+    <% end %>
+    <img src="<%= @context.image.url_path.full %>" alt="<%= @context.image.title %>" class="full"/>
+    <% if @context.image.next %>
+      <a href="<%= @context.image.next %>" class="navigate-next-image">Next</a>
+    <% end %>
+    </div>
+  </section>
+  <% if @context.image.description %>
+  <section id="image-description" class="nice-box">
+    <p class="has-icon"><%= @context.image.description %></p>
+    <% if @context.user.login && @context.user.login == @context.collection.owner %>
+    <footer>
+      <ul class="actions">
+        <li><a href="/edit/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" rel="nofollow" class="image-edit-link has-icon">You can edit details of this image.</a></li>
+      </ul>
+    </footer>
+    <% end %>
+  </section>
+  <% end %>
+  <section id="interactions" class="image-comments grid">
+    <% @context.image.all_comments.each do |comment| %>
+      <%= erb :_image_comment, locals: {comment: comment, context: @context} %>
+    <% end %>
+  </section>
+  <section id="new-comment">
+    <% if @context.collection.operations.allow_comments %>
+      <% if @context.user.login %>
+        <form id="new-comment-form" action="/comment/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" method="post">
+          <fieldset>
+            <legend>Say something, <%= @context.user.name %></legend>
+            <div class="form-row">
+              <label for="comment">Your comment</label>
+              <textarea id="comment" name="comment" required="required" maxlength="512" minlength="8"></textarea>
+            </div>
+            <p class="explanation">Be kind. Do not post links, ads, hate speech and other bad things. Invalid comments are automatically rejected without notice. Your IP address is logged with the comment. You cannot edit or delete comments. Comments must be 8 or more characters and up to 512 characters. Characters <code>&lt;</code> and <code>&gt;</code> are not allowed. If comments are abused, they will be disabled.</p>
+            <input type="hidden" name="collection" value="<%= @context.collection_name %>" />
+            <input type="hidden" name="gallery" value="<%= @context.gallery_name %>" />
+            <input type="hidden" name="image" value="<%= @context.image_name %>" />
+          </fieldset>
+          <input type="submit" value="Post comment" />
+        </form>
+      <% else %>
+      <% end %>
+    <% end %>
+  </section>
+</section>

@@ -1,0 +1,25 @@
+<article class="image-summary nice-box nice-image-box">
+  <header><h2><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image.name %>" rel="nofollow" class="link-to-image"><%= image.title %></a></h2></header>
+  <div class="description has-thumbnail">
+    <a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image.name %>" rel="nofollow" class="link-to-image">
+    <img src="<%= image.url_path.miniature %>" alt="<%= image.title %>" class="miniature" />
+    </a>
+  </div>
+  <footer class="centred normal-size">
+      <% if @context.collection.operations.allow_reactions %>
+        <%= erb :_image_reactions, locals: {image: image, context: @context} %>
+      <% end %>
+      <% if @context.collection.operations.allow_comments %>
+        <ul class="icons comments">
+          <li><span class="reaction-count"><span class="reaction">💬</span><span class="count"><%= image.all_comments.count %></span></span></li>
+        </ul>
+      <% end %>
+  </footer>
+  <footer>
+    <ul class="actions">
+      <% if @context.user.login == @context.collection.owner %>
+        <a href="/edit/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image.name %>" rel="nofollow" class="image-edit-link has-icon">You can edit details of this image.</a>
+      <% end %>
+    </ul>
+  </footer>
+</article>

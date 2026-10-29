@@ -1,0 +1,16 @@
+<ul class="icons reactions">
+  <% if image.user_reactions %>
+    <% image.user_reactions.each do |reaction, reacted| %>
+      <li>
+        <button class="reaction-count reaction-button<%= ' reacted' if reacted %>" aria-pressed="<% reacted == true %>" data-collection-name="<%= context.collection_name %>" data-gallery-name="<%= context.gallery_name %>" data-image-name="<%= image.name %>" data-reaction="<%= reaction %>" onclick="reactToImage(event, this)">
+          <span class="reaction"><%= reaction %></span>
+          <span class="count"><%= image.reactions[reaction].count %></span>
+        </button>
+      </li>
+    <% end %>
+  <% else %>
+    <% context.collection.operations.reactions.each do |reaction| %>
+      <li><span class="reaction-count"><span class="reaction"><%= reaction %></span><span class="count"><%= image.reactions[reaction].count %></span></span></li>
+    <% end %>
+  <% end %>
+</ul>

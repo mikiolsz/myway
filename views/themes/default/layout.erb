@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+
+<html lang="en">
+<head>
+  <title><%= @config.title %></title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <link rel="stylesheet" href="/assets/_fontawesome/css/fontawesome.min.css" />
+  <link rel="stylesheet" href="/assets/_fontawesome/css/regular.min.css" />
+  <link rel="stylesheet" href="/assets/_fontawesome/css/solid.min.css" />
+  <link rel="stylesheet" href="/assets/<%= @config.theme %>/css/main.css" />
+</head>
+<body>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Header -->
+  <header id="header">
+    <ul class="breadcrumbs">
+      <li><a href="/" rel="nofollow"><%= @config.title %></a></li>
+      <% if @context.collection %>
+      <li><a href="/collection/<%= @context.collection_name %>" rel="nofollow"><%= @context.collection.title %></a></li>
+      <% end %>
+      <% if @context.gallery %>
+      <li><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>" rel="nofollow"><%= @context.gallery.title %></a></li>
+      <% end %>
+      <% if @context.image %>
+      <li><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" rel="nofollow"><%= @context.image.title %></a></li>
+      <% end %>
+    </ul>
+    <div id="visitor-panel">
+      <% if @context.user.login %>
+      <div>Welcome, <%= @context.user.name %>!</div>
+      <% elsif @context.collection_name && @context.collection.operations.allow_visitors %>
+      <p>You are not logged in. You can <a href="/login/<%= @context.collection_name %>" rel="nofollow" class="has-icon visitor-login-link">log in as a visitor</a> or <a href="/register/<%= @context.collection_name %>" class="has-icon visitor-register-link" rel="nofollow">create as a new visitor account</a>.</p>
+      <% end %>
+    </div>
+  </header>
+
+  <section id="contents">
+  <%= yield %>
+  </section>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <ul class="actions">
+      <% if @context.user.admin %>
+      <li><a href="/admin/collection" rel="nofollow" class="create-collection-link has-icon">Create a new collection</a></li>
+      <% else %>
+      <li><a href="/admin" rel="nofollow" class="admin-login-link has-icon">Log in as admin</a></li>
+      <% end %>
+    </ul>
+    <ul class="copyright">
+      <li>&copy; 2026+ <a href="https://www.unforgiven.pl" rel="nofollow">Unforgiven pl</a></li>
+      <li>Coding and design: Miki</li>
+      <li>This site runs <a href="https://www.github.com/mikiolsz/myway">Myway</a></li>
+    </ul>
+  </footer>
+
+</div>
+
+<script src="/assets/default/js/reactions.js"></script>
+</body>
+</html>

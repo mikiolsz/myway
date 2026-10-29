@@ -1,0 +1,21 @@
+<h1>Edit gallery</h1>
+<p>You are editing a gallery that belongs to a collection <code><%= @context.collection_name %></code> with a source directory <code><%= @context.collection.source %></code>.</p>
+<form id="edit-gallery" action="/edit/<%= @context.collection_name %>/<%= @context.gallery_name %>" method="post">
+  <fieldset>
+    <legend>Gallery settings</legend>
+    <div class="form-row">
+    <label for="title">Gallery title</label>
+    <input type="text" id="title" name="title" value="<%= gallery.title %>" maxlength="64" required="required" />
+    </div>
+    <p class="explanation">Title of the collection is required. This is the human-readable name. Initially it is obtained from the name of the directory.</p>
+    <div class="form-row">
+    <label for="description">Gallery description</label>
+    <textarea name="description" id="description" rows="10" cols="80"><%= gallery.description %></textarea>
+    </div>
+    <p class="explanation">Describe the contents of the gallery. This is optional.</p>
+  </fieldset>
+  <input type="hidden" name="name" value="<%= @context.gallery_name %>" />
+  <input type="hidden" name="collection" value="<%= @context.collection_name %>" />
+  <%= erb :_form_errors, locals: {form_errors: gallery_errors} if gallery_errors && !gallery_errors.empty? %>
+  <input type="submit" value="Update gallery" />
+</form>

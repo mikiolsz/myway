@@ -1,0 +1,26 @@
+<h1>Edit image</h1>
+<p>You are editing an image that belongs to a gallery <code><%= @context.collection_name %>/<%= @context.gallery_name %></code> with a source directory <code><%= @context.collection.source %></code>.</p>
+<form id="edit-image" action="/edit/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= @context.image_name %>" method="post">
+  <fieldset>
+    <legend>Details of <%= @context.image_name %></legend>
+    <div class="form-row">
+      <label for="title">Image title</label>
+      <input type="text" id="title" name="title" value="<%= image.title %>" maxlength="64"/>
+    </div>
+    <p class="explanation">When image title is not provided, file name (without the extension) will be used. The title may contain up to 64 characters.</p>
+    <div class="form-row">
+      <label for="description">Miniature</label>
+      <img id="miniature" src="<%= @context.image.url_path.miniature %>" alt="<%= @context.image.title %>" />
+    </div>
+    <div class="form-row">
+      <label for="description">Description</label>
+      <textarea id="description" name="description"><%= image.description %></textarea>
+    </div>
+    <p class="explanation">Description may not contain html code - any <code>&lt; &gt; @ ://</code> are removed.</p>
+    <input type="hidden" name="collection" value="<%= @context.collection_name %>" />
+    <input type="hidden" name="gallery" value="<%= @context.gallery_name %>" />
+    <input type="hidden" name="name" value="<%= @context.image_name %>" />
+    <input type="hidden" name="filename" value="<%= @context.image.filename %>" />
+  </fieldset>
+  <input type="submit" value="Save details" />
+</form>

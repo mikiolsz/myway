@@ -10,7 +10,7 @@
     maxlength="16"
     minlength="3"
     required="required"
-    pattern="[a-z]{3,16}"/>
+    pattern="^[a-z]{3,16}$"/>
   <p class="explanation">Define a login. Once selected, the login cannot be changed. Only lowercase letters from a to z are allowed. Login must be between 3 and 16 characters long.</p>
   <label for="name">Display name</label>
   <input type="text" id="name" name="name" placeholder="Display name" value="<%= user.name %>" maxlength="64"/>

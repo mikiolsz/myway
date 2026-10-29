@@ -1,0 +1,20 @@
+<section id="visitor-registration">
+  <header><h2>Visitor registration</h2></header>
+  <form action="/register/<%= @context.collection_name %>" method="post">
+  <%= erb :_new_user_fieldset, locals: {user: visitor, new_user_title: 'Visitor profile for ' + @context.collection.title} %>
+  <% if ask_collection_password %>
+  <fieldset>
+    <legend>Collection password</legend>
+    <label for="collection-password">Enter collection password for <%= @context.collection.title %></label>
+    <input type="password" id="collection-password" name="collection-password" required="required" />
+    <p class="explanation">Collection password is required to register as a visitor. It should have been delivered to you separately.</p>
+  </fieldset>
+  <% end %>
+  <%= erb :_form_errors, :locals => {form_errors: visitor_errors} if visitor_errors && !visitor_errors.empty? %>
+  <% if login_after_submission %>
+  <input type="hidden" name="login-after-submission" id="login-after-submission" value="true" />
+  <p class="explanation">When your account is created successfully, you will be automatically asked to log in.</p>
+  <% end %>
+  <input type="submit" value="Register" />
+  </form>
+</section>

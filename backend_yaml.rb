@@ -71,7 +71,7 @@ module Myway
       [gallery_dir(collection, gallery), image + '.yml'].join('/')
     end
     def image_miniature_file(collection, gallery, file)
-      [public_images_dir(collection, gallery), 'mini.'+file].join('/')
+      [public_images_dir(collection, gallery), 'mini.' + file].join('/')
     end
     def image_miniature_url(collection, gallery, file)
       ['/images', collection, gallery, 'mini.'+file].join('/')
@@ -94,7 +94,19 @@ module Myway
       Dir.glob(File.join(image_data_dir(collection, gallery, image), 'reaction.*.yml')).collect { |path| YAML.load_file(path) rescue nil }.compact
     end
     def image_comments(collection, gallery, image)
-      Dir.glob(File.join(image_data_dir(collection, gallery, image), 'comment.*.yml')).collect { |path| YAML.load_file(path) rescue nil }.compact
+      Dir.glob(File.join(image_data_dir(collection, gallery, image), 'comment.*.yml')).collect { |path| YAML.load_file(path, permitted_classes: [Time])  }.compact.select { |comment| comment.visible }
+    end
+
+    def update_visitor(collection, visitor)
+      collection_data = collection_data(collection)
+      collection_data.visitors ||= []
+      if (existing_visitor = collection_data.visitors.find {|v| v.login == visitor.login})
+        existing_visitor.name = visitor.name
+        existing_visitor.password = visitor.password
+      else
+        collection_data.visitors << visitor
+      end
+      File.write(collection_file(collection), YAML.dump(collection_data))
     end
 
     def gallery_details(collection, gallery)
@@ -102,14 +114,38 @@ module Myway
          .collect { |path| File.basename(path, '.*') }
          .collect do |image_name|
 
-        details = { 'data_file' => image_data_file(collection, gallery, image_name), 'data_name' => image_name }
-        details.data = YAML.load_file(image_data_file(collection, gallery, image_name))
-        details.comments = image_comments(collection, gallery, image_name)
-        details.reactions = image_reactions(collection, gallery, image_name)
-        details.file_path = {'miniature' => image_miniature_file(collection, gallery, details.data.filename), 'full' => image_full_file(collection, gallery, details.data.filename)}
-        details.url_path = {'miniature' => image_miniature_url(collection, gallery, details.data.filename), 'full' => image_full_url(collection, gallery, details.data.filename)}
+        image_data_file = image_data_file(collection, gallery, image_name)
+        details = YAML.load_file(image_data_file)
+        details.data_file = image_data_file
+        details.name = image_name
+        details.all_comments = image_comments(collection, gallery, image_name)
+        details.all_reactions = image_reactions(collection, gallery, image_name)
+        details.file_path = {'miniature' => image_miniature_file(collection, gallery, details.filename), 'full' => image_full_file(collection, gallery, details.filename)}
+        details.url_path = {'miniature' => image_miniature_url(collection, gallery, details.filename), 'full' => image_full_url(collection, gallery, details.filename)}
         details
       end
+    end
+
+    def user_reaction(collection, gallery, image, reaction, user)
+      reaction_file = File.join(image_data_dir(collection, gallery, image), ['reaction', user, 'yml'].join('.'))
+
+      image_reactions = File.exist?(reaction_file) ? YAML.load_file(reaction_file) : []
+      found = image_reactions.find { |r| r.reaction == reaction }
+      if found
+        image_reactions.delete(found)
+      else
+        image_reactions <<  {'reaction' => reaction, 'login' => user, 'time' => Time.now.utc.to_s}
+      end
+      if image_reactions.empty?
+        File.delete(reaction_file) if File.exist?(reaction_file)
+      else
+        File.write(reaction_file, YAML.dump(image_reactions))
+      end
+    end
+
+    def user_comment(collection, gallery, image, comment)
+      comment_file = File.join(image_data_dir(collection, gallery, image), ['comment', (comment.timestamp.to_f*1000).to_i.to_s, 'yml'].join('.'))
+      File.write(comment_file, YAML.dump(comment))
     end
 
     def reinit_collection(collection_name, path_to_scan, miniature_size_string, full_size_string)
@@ -161,6 +197,19 @@ module Myway
     def update_collection(name, data)
       ensure_collection_dir(name)
       File.write(collection_file(name), YAML.dump(data))
+    end
+
+    def update_gallery(collection, name, data)
+      ensure_collection_dir(collection)
+      ensure_gallery_dir(collection, name)
+      File.write(gallery_file(collection, name), YAML.dump(data))
+    end
+
+    def update_image(collection, gallery, name, data)
+      ensure_collection_dir(collection)
+      ensure_gallery_dir(collection, gallery)
+      ensure_image_data_dir(collection, gallery, name)
+      File.write(image_data_file(collection, gallery, name), YAML.dump(data))
     end
 
     def file_supported?(path)

@@ -1,20 +1,6 @@
-<!-- Items -->
-<div class="items">
-
-  <div class="item intro span-3">
-    <h1><%= @context.gallery.title %></h1>
-  </div>
-  <div class="item explanation span-3">
-    <p><%= @context.gallery.description %></p>
-  </div>
-</div>
-<% @context.images.each_slice(5) do |slice| %>
-  <div class="items">
-    <% slice.each do |image_details| %>
-    <article class="item thumb span-1">
-      <h2><a href="/collection/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image_details.data_name %>" rel="nofollow"><%= image_details.data.title %></a></h2>
-      <img src="<%= image_details.url_path.miniature %>" alt="<%= image_details.data.title %>" />
-    </article>
-    <% end %>
-  </div>
-<% end %>
+<%= erb :_gallery_summary, locals: {name: @context.gallery_name, gallery: @context.gallery} %>
+<section id="images" class="grid">
+  <% @context.images.each do |image| %>
+    <%= erb :_image_summary, locals:  {image: image} %>
+  <% end %>
+</section>

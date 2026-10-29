@@ -1,21 +1,6 @@
-<!-- Items -->
-<div class="items">
-
-  <div class="item intro span-3">
-    <h1>Varia Gallery</h1>
-    <p>
-      This web site contains collections of images. Please use the address you were given.
-    </p>
-  </div>
-  <div class="item explanation span-3">
-    <p>
-      You were given a link, e.g. <code>https://varia.uneven-eyes.info/dragonflies</code>. Please make sure you typed the link properly.
-      <br/>
-      There are no publicly available collections.
-      <br/>
-      Should you need any assistance, please email <code>uneven-eyes[at]gmail[dot]com</code>.
-    </p>
-  </div>
-
-</div>
-
+<section id="collections">
+  <article class="collection-summary">
+    <header><h2><%= @config.title %></h2></header>
+    <div><%= @config.description %></div>
+  </article>
+</section>

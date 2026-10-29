@@ -1,0 +1,21 @@
+<article class="nice-box with-border gallery-summary">
+  <header>
+    <h2>
+      <% if @context.gallery_name == name %>
+      <%= gallery.title %>
+      <% else %>
+      <a href="/collection/<%= @context.collection_name %>/<%= name %>" rel="nofollow" class="link-to-gallery"><%= gallery.title %></a>
+      <% end %>
+    </h2>
+  </header>
+  <div class="description"><%= gallery.description %></div>
+  <% if @context.user.login == @context.collection.owner %>
+  <footer>
+    <ul class="actions">
+      <li>
+        <a href="/edit/<%= @context.collection_name %>/<%= name %>" rel="nofollow" class="gallery-edit-link has-icon">You can edit settings of this gallery.</a>
+      </li>
+    </ul>
+  </footer>
+  <% end %>
+</article>
