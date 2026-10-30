@@ -9,6 +9,11 @@
     </div>
     <p class="explanation">Title of the collection is required. This is the human-readable name. Initially it is obtained from the name of the directory.</p>
     <div class="form-row">
+    <label for="date">Gallery date</label>
+    <input type="text" id="date" name="date" value="<%= gallery.date %>" />
+    </div>
+    <p class="explanation">Pick a date that corresponds to this gallery.</p>
+    <div class="form-row">
     <label for="description">Gallery description</label>
     <textarea name="description" id="description" rows="10" cols="80"><%= gallery.description %></textarea>
     </div>

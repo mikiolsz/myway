@@ -154,18 +154,20 @@ module Myway
 
     def init_collection(collection_name, path_to_scan, miniature_size_string, full_size_string)
       # get galleries - one directory per gallery
-      gallery_dirs = Dir.glob(File.join(path_to_scan, '*')).select { |path| File.directory?(path) && File.readable?(path) && !path.start_with?('.') }.collect { |path| path.split('/').last }
+      gallery_dirs = Dir.glob(File.join(path_to_scan, '*')).select { |path| File.directory?(path) && File.readable?(path) && !path.start_with?('.') }
       ensure_collection_dir collection_name
 
-      gallery_dirs.each do |dir|
+      gallery_dirs.each do |full_dir_path|
+        dir = full_dir_path.split('/').last
         # prepare gallery info
-        gallery_info = {'title' => dir.to_s.human_readable}
+        gallery_info = {'title' => dir.to_s.human_readable, 'date' => File.mtime(full_dir_path).strftime('%Y-%m-%d %H:%M:%S')}
         ensure_gallery_dir(collection_name, dir)
         File.write(gallery_file(collection_name, dir), YAML.dump(gallery_info))
 
         # process image files found in the gallery
-        images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }.collect { |path| File.basename(path) }
-        images.each do |full_filename|
+        images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }
+        images.each do |full_path|
+          full_filename = File.basename(full_path)
           {image_miniature_file(collection_name, dir, full_filename) => miniature_size_string, image_full_file(collection_name, dir, full_filename) => full_size_string}.each do |file, size|
             # create image miniature and "full size"
             _out, _err, _status = Open3.capture3(
@@ -179,6 +181,7 @@ module Myway
           file_info = {
             'filename' => full_filename,
             'title' => just_filename,
+            'date' => File.mtime(full_path).strftime('%Y-%m-%d %H:%M:%S'),
           }
           ensure_image_data_dir(collection_name, dir, just_filename)
 

@@ -28,6 +28,10 @@ module Myway
         'title' => params['title'],
         'description' => params['description'],
         'information' => params['information'],
+        'sort_galleries_by' => params['sort_galleries_by'],
+        'reverse_gallery_sort' => params['reverse_gallery_sort'] == 'true',
+        'sort_images_by' => params['sort_images_by'],
+        'reverse_image_sort' => params['reverse_image_sort'] == 'true',
         'operations' => {
           'allow_visitors' => params['allow_visitors'] == 'true',
           'allow_reactions' => params['allow_reactions'] == 'true',
@@ -50,7 +54,7 @@ module Myway
       gallery_errors << 'Invalid gallery title.' unless params['title'] && params['title'].length > 1
       gallery_errors << 'Invalid gallery or collection name' unless @backend.gallery_exist?(params['collection'], params['name']) == updating
 
-      [gallery_errors, {'title' => params['title'], 'description' => params['description']}]
+      [gallery_errors, {'title' => params['title'], 'description' => params['description'], 'date' => params['date']}]
     end
 
     def build_comment_from(params, user_login = nil, user_name = nil, ip = nil)
@@ -71,7 +75,7 @@ module Myway
     def build_image_data_from(params, name)
       image_title = params['title']
       image_title = name if image_title.nil? || image_title.strip.empty?
-      result = {'title' => image_title, 'filename' => params['filename']}
+      result = {'title' => image_title, 'filename' => params['filename'], 'date' => params['date']}
       result.description = params['description'].delete('<', '>').gsub(/:\/\//, '') if params['description']
       [[], result]
     end

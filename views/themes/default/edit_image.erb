@@ -9,6 +9,11 @@
     </div>
     <p class="explanation">When image title is not provided, file name (without the extension) will be used. The title may contain up to 64 characters.</p>
     <div class="form-row">
+      <label for="date">Image date</label>
+      <input type="text" id="date" name="date" value="<%= image.date %>" maxlength="64"/>
+    </div>
+    <p class="explanation">Enter date (and time) associated with the image. This is displayed on screen.</p>
+    <div class="form-row">
       <label for="description">Miniature</label>
       <img id="miniature" src="<%= @context.image.url_path.miniature %>" alt="<%= @context.image.title %>" />
     </div>

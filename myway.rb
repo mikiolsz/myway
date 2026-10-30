@@ -15,6 +15,12 @@ class Hash
   end
 end
 
+class Array
+  def maybe_reverse(maybe)
+    maybe ? reverse : self
+  end
+end
+
 class String
   def human_readable
     self.gsub(/\\W/, ' ').capitalize
@@ -57,14 +63,17 @@ class Application < Sinatra::Base
       @context.collection = @backend.collection_data(collection_name)
     end
 
-    @context.galleries = Hash[@backend.available_galleries(collection_name).collect { |g| [g, YAML.load_file(@backend.gallery_file(collection_name, g))] } ] if options.include?(:galleries)
+    @context.galleries = Hash[@backend.available_galleries(collection_name)
+                                      .collect { |g| [g, YAML.load_file(@backend.gallery_file(collection_name, g))] }
+                                      .sort_by { |g| g[1][@context.collection.sort_galleries_by || 'name'] }
+                                      .maybe_reverse(@context.collection.reverse_gallery_sort)] if options.include?(:galleries)
     gallery_name = parameters[:gallery] || @context.gallery_name
     if parameters.include?(:gallery)
       @context.gallery_name = gallery_name
       @context.gallery = @backend.gallery_data(collection_name, gallery_name)
 
       if options.include?(:images) || parameters[:image]
-        @context.images = @backend.gallery_details(collection_name, gallery_name)
+        @context.images = @backend.gallery_details(collection_name, gallery_name).sort_by { |i| i[@context.collection.sort_images_by || 'name'] }.maybe_reverse(@context.collection.reverse_image_sort)
         # modify the raw data to be more meaningful
         @context.images.each do |image|
           by_type = Hash.new { |h, k| h[k] = [] }

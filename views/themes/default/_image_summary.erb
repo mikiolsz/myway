@@ -21,10 +21,13 @@
     <% end %>
   </footer>
   <footer>
+    <% if image.date && !image.date.empty? %>
+    <p class="timestamp explanation"><%= image.date %></p>
+    <% end %>
+    <% if @context.user.login == @context.collection.owner %>
     <ul class="actions">
-      <% if @context.user.login == @context.collection.owner %>
         <a href="/edit/<%= @context.collection_name %>/<%= @context.gallery_name %>/<%= image.name %>" rel="nofollow" class="image-edit-link has-icon">You can edit details of this image.</a>
-      <% end %>
     </ul>
+    <% end %>
   </footer>
 </article>

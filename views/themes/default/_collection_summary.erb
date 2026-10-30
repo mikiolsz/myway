@@ -15,6 +15,9 @@
       <% if collection.operations.allow_downloads %>
         <li><span class="fa-solid fa-file-arrow-down" title="Users can download full-size images" /></li>
       <% end %>
+      <% if collection.password && !collection.password.empty? %>
+        <li><span class="fa-solid fa-user-lock" title="Collection is password-protected" /></li>
+      <% end %>
     </ul>
     <ul class="actions">
       <% if @context.user.login == collection.owner %>

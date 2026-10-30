@@ -11,6 +11,9 @@
   <div class="description"><%= gallery.description %></div>
   <% if @context.user.login == @context.collection.owner %>
   <footer>
+    <% if gallery.date && !gallery.date.empty? %>
+    <p class="explanation timestamp"><%= gallery.date %></p>
+    <% end %>
     <ul class="actions">
       <li>
         <a href="/edit/<%= @context.collection_name %>/<%= name %>" rel="nofollow" class="gallery-edit-link has-icon">You can edit settings of this gallery.</a>

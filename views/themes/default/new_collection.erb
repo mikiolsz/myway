@@ -20,6 +20,35 @@
     <p class="explanation">This title will be shown in many places on the screen.</p>
   </fieldset>
   <fieldset>
+    <legend>Gallery and image sorting</legend>
+    <div class="form-row">
+    <label for="sort_galleries_by">Sort galleries by</label>
+    <select id="sort_galleries_by" name="sort_galleries_by">
+      <option value="name"<%= ' selected="selected"' if !collection.sort_galleries_by || (collection.sort_galleries_by == 'name') %>>Name (alphabetic)</option>
+      <option value="date"<%= ' selected="selected"' if collection.sort_galleries_by == 'date' %>>Date (from oldest to newest)</option>
+      <option value="title"<%= ' selected="selected"' if collection.sort_galleries_by == 'title' %>>Title (alphabetic)</option>
+    </select>
+    </div>
+    <div class="form-row">
+      <label for="reverse_gallery_sort">Reverse gallery sorting order?</label>
+      <input type="checkbox" id="reverse_gallery_sort" name="reverse_gallery_sort"<%= ' checked = "checked"' if collection.reverse_gallery_sort %>/>
+    </div>
+    <p class="explanation">Choose how to sort galleries within this collection. Since date and title are optional, if those are missing for a gallery, its name will be used instead.</p>
+    <div class="form-row">
+      <label for="sort_images_by">Sort images in galleries by</label>
+      <select id="sort_images_by" name="sort_images_by">
+        <option value="name"<%= ' selected="selected"' if !collection.sort_images_by || (collection.sort_images_by == 'name') %>>Name (alphabetic)</option>
+        <option value="date"<%= ' selected="selected"' if collection.sort_images_by == 'date' %>>Date (from oldest to newest)</option>
+        <option value="title"<%= ' selected="selected"' if collection.sort_images_by == 'title' %>>Title (alphabetic)</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label for="reverse_gallery_sort">Reverse gallery sorting order?</label>
+      <input type="checkbox" id="reverse_gallery_sort" name="reverse_gallery_sort"<%= ' checked = "checked"' if collection.reverse_gallery_sort %>/>
+    </div>
+    <p class="explanation">Choose how to sort images within galleries of this collection. Since date and title are optional, if those are missing for an image, its name will be used instead.</p>
+  </fieldset>
+  <fieldset>
     <legend>Configuration</legend>
     <div class="form-row">
     <label for="allow_visitors">Allow visitors to create accounts?</label>
