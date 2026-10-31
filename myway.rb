@@ -226,10 +226,13 @@ class Application < Sinatra::Base
   end
 
   get '/' do
-    redirect to('/setup') unless @config
-    in_context :collections
+    if !@config
+      erb :no_setup
+    else
+      in_context :collections
 
-    erb @context.collections.empty? ? :no_collections : :collection_list
+      erb @context.collections.empty? ? :no_collections : :collection_list
+    end
   end
 
   post '/collection' do
