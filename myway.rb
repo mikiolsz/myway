@@ -151,7 +151,7 @@ class Application < Sinatra::Base
 
     in_context # initialise context
 
-    Application.set :views, 'views/themes/' + (@context.collection&.theme || @config.theme || 'default')
+    Application.set :views, 'views/themes/' + (@context.collection&.theme || @config&.theme || 'default')
   end
 
   get '/setup' do
