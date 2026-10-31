@@ -157,7 +157,7 @@ class Application < Sinatra::Base
   get '/setup' do
     halt 401 if @config
 
-    erb :setup, :layout => :admin, :locals => { :available_themes => @backend.available_themes, :config => {}, :user_errors => [] }
+    erb :setup, :locals => { :available_themes => @backend.available_themes, :config => {}, :user_errors => [] }
   end
 
   post '/setup' do
