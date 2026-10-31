@@ -227,7 +227,7 @@ class Application < Sinatra::Base
 
   get '/' do
     if !@config
-      erb :no_setup
+      erb :no_setup, :layout => false
     else
       in_context :collections
 
