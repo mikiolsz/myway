@@ -156,8 +156,9 @@ class Application < Sinatra::Base
 
   get '/setup' do
     halt 401 if @config
-
-    erb :setup, :locals => { :available_themes => @backend.available_themes, :config => {'title' => 'Myway setup', 'theme' => 'default', 'admin' => {}}, :user_errors => [] }
+    # use @config to make layout work (still, original file-based config does not exist)
+    @config = {'title' => 'Myway setup', 'theme' => 'default', 'admin' => {}}
+    erb :setup, :locals => { :available_themes => @backend.available_themes, :config => @config, :user_errors => [] }
   end
 
   post '/setup' do
