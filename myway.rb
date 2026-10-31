@@ -162,11 +162,7 @@ class Application < Sinatra::Base
   end
 
   post '/setup' do
-    if @config
-      admin_auth!
-    else
-      halt 401
-    end
+    admin_auth! if @config
 
     current_config = {
       'title' => params['title'],
