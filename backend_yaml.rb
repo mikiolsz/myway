@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'fileutils'
+
 module Myway
   class Backend
     MAIN_CONFIG_FILE = 'collections/.config.yml'.freeze
@@ -148,48 +150,80 @@ module Myway
       File.write(comment_file, YAML.dump(comment))
     end
 
+    def read_directories_from(path_to_scan)
+      Dir.glob(File.join(path_to_scan, '*')).select { |path| File.directory?(path) && File.readable?(path) && !path.start_with?('.') }
+    end
+
     def reinit_collection(collection_name, path_to_scan, miniature_size_string, full_size_string)
-      warn 'this has not been implemented yet'
+      # reinitialising: get the tree of existing collection data (directory/file), get the new collection data (directory/file)
+      # remove entirely directories that are not present in old, recreate directories and files that are not yet created
+      source_galleries = read_directories_from(path_to_scan)
+      existing_galleries = read_directories_from(collection_dir(collection_name))
+
+      source_mapped = Hash[source_galleries.map {|dir| [gallery_dir(collection_name, dir.split('/').last), dir]}]
+
+      to_add = (source_mapped.keys - existing_galleries).map {|dir| source_mapped[dir]}
+      to_remove = existing_galleries - source_mapped.keys
+
+      # delete recursively the gallery data dir and the public images dir for that gallery
+      to_remove.each do |full_path|
+        gallery_name = full_path.split('/').last
+        FileUtils.rm_rf(gallery_dir(collection_name, gallery_name))
+        FileUtils.rm_rf(public_images_dir(collection_name, gallery_name))
+      end
+      to_add.each do |full_path|
+        accept_gallery_dir(full_path, path_to_scan, collection_name, miniature_size_string, full_size_string)
+      end
+
     end
 
     def init_collection(collection_name, path_to_scan, miniature_size_string, full_size_string)
       # get galleries - one directory per gallery
-      gallery_dirs = Dir.glob(File.join(path_to_scan, '*')).select { |path| File.directory?(path) && File.readable?(path) && !path.start_with?('.') }
+      gallery_dirs = read_directories_from(path_to_scan)
       ensure_collection_dir collection_name
 
       gallery_dirs.each do |full_dir_path|
-        dir = full_dir_path.split('/').last
-        # prepare gallery info
-        gallery_info = {'title' => dir.to_s.human_readable, 'date' => File.mtime(full_dir_path).strftime('%Y-%m-%d %H:%M:%S')}
-        ensure_gallery_dir(collection_name, dir)
-        File.write(gallery_file(collection_name, dir), YAML.dump(gallery_info))
-
-        # process image files found in the gallery
-        images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }
-        images.each do |full_path|
-          full_filename = File.basename(full_path)
-          {image_miniature_file(collection_name, dir, full_filename) => miniature_size_string, image_full_file(collection_name, dir, full_filename) => full_size_string}.each do |file, size|
-            # create image miniature and "full size"
-            _out, _err, _status = Open3.capture3(
-              "magick",
-              File.join(path_to_scan, dir, full_filename),
-              "-resize", size,
-              file
-            )
-          end
-          just_filename = File.basename(full_filename, '.*')
-          file_info = {
-            'filename' => full_filename,
-            'title' => just_filename,
-            'date' => File.mtime(full_path).strftime('%Y-%m-%d %H:%M:%S'),
-          }
-          ensure_image_data_dir(collection_name, dir, just_filename)
-
-          # image data file
-          File.write(image_data_file(collection_name, dir, just_filename), YAML.dump(file_info))
-        end
-
+        accept_gallery_dir(full_dir_path, path_to_scan, collection_name, miniature_size_string, full_size_string)
       end
+    end
+
+    def accept_gallery_dir(full_dir_path, path_to_scan, collection_name, miniature_size_string, full_size_string)
+      dir = full_dir_path.split('/').last
+      # prepare gallery info
+      gallery_info = {'title' => dir.to_s.human_readable, 'date' => File.mtime(full_dir_path).strftime('%Y-%m-%d %H:%M:%S')}
+      ensure_gallery_dir(collection_name, dir)
+      File.write(gallery_file(collection_name, dir), YAML.dump(gallery_info))
+
+      # process image files found in the gallery
+      images = Dir.glob(File.join(path_to_scan, dir,'*.*')).select { |path| file_supported?(path) && !path.start_with?('.') }
+      images.each do |full_path|
+        accept_image_file(full_path, collection_name, path_to_scan, dir, miniature_size_string, full_size_string)
+      end
+    end
+
+    def accept_image_file(full_path, collection_name, collection_path, gallery_name, miniature_size_string, full_size_string)
+      dir = gallery_name
+      path_to_scan = collection_path
+      full_filename = File.basename(full_path)
+      {image_miniature_file(collection_name, dir, full_filename) => miniature_size_string, image_full_file(collection_name, dir, full_filename) => full_size_string}.each do |file, size|
+        # create image miniature and "full size"
+        _out, _err, _status = Open3.capture3(
+          "magick",
+          File.join(path_to_scan, dir, full_filename),
+          "-resize", size,
+          file
+        )
+      end
+      just_filename = File.basename(full_filename, '.*')
+      file_info = {
+        'filename' => full_filename,
+        'title' => just_filename,
+        'date' => File.mtime(full_path).strftime('%Y-%m-%d %H:%M:%S'),
+      }
+      ensure_image_data_dir(collection_name, dir, just_filename)
+
+      # image data file
+      File.write(image_data_file(collection_name, dir, just_filename), YAML.dump(file_info))
     end
 
     def update_setup(config)

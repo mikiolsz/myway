@@ -359,6 +359,23 @@ class Application < Sinatra::Base
     erb :edit_collection, locals: {collection_errors: [], collection: @context.collection}
   end
 
+  get '/refresh/:collection_name' do |collection_name|
+    halt 404 unless @backend.available_collections.include?(collection_name)
+    in_context :collections, :collection => collection_name
+    halt 403 unless can_change_collection?
+
+    Thread.new(@context.collection, collection_name, @context.collection.source) do |collection, name, source|
+      begin
+        @backend.reinit_collection(name, source, "#{collection.miniature.max_width}x#{collection.miniature.max_height}", "#{collection.full.max_width}x#{collection.full.max_height}")
+      rescue => e
+        warn "problems refreshing collection #{name}, error of type #{e.class}: #{e.message}"
+      end
+    end
+
+
+    erb :refresh_collection
+  end
+
   post '/edit/:collection_name' do |collection_name|
     halt 400 unless collection_name == params['name']
     halt 404 unless @backend.available_collections.include?(collection_name)

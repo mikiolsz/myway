@@ -21,7 +21,10 @@
     </ul>
     <ul class="actions">
       <% if @context.user.login == collection.owner %>
-        <a href="/edit/<%= name %>" rel="nofollow" class="collection-edit-link has-icon">You can edit settings of this collection.</a>
+        You can
+        <a href="/edit/<%= name %>" rel="nofollow" class="collection-edit-link has-icon">edit settings of this collection</a>
+        or
+        <a href="/refresh/<%= name %>" rel="nofollow" class="collection-refresh-link has-icon">refresh it</a>.
       <% end %>
     </ul>
   </footer>
